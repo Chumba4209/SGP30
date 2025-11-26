@@ -1,0 +1,57 @@
+#include <Arduino.h>
+#include <SPI.h>
+#include <Wire.h> // for connecting I2C devices
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_SGP30.h>
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+Adafruit_SGP30 sgp30; // create SGP30 sensor object
+
+void setup() {
+ Serial.begin(115200); // start serial monitor
+ display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS); // initialize screen
+ sgp30.begin(); // initialize sgp30 sensor
+
+  Serial.print("Found SGP30 serial #");
+  Serial.print(sgp30.serialnumber[0], HEX);
+  Serial.print(sgp30.serialnumber[1], HEX);
+  Serial.println(sgp30.serialnumber[2], HEX);
+
+  display.clearDisplay();
+  display.display();
+  delay(2000);
+
+}
+
+void loop() {
+  //Read air quality values (eCO2 and TVOC)
+  if (sgp30.IAQmeasure())
+  {
+    Serial.printf("CO2: %d TVOC: %d\n", sgp30.eCO2, sgp30.TVOC);
+    // Serial.println(sgp30.eCO2);
+    // Serial.println(sgp30.TVOC);
+  }
+
+  display.clearDisplay();
+  display.setTextSize(1); 
+  display.setTextColor(SSD1306_WHITE); 
+  display.setCursor(0, 0);     
+  display.printf("SGP30");
+  display.setCursor(0, 20);     
+  display.printf("CO2: %d \n", sgp30.eCO2); // same as: display.println("Temp: " + String(temp));
+  display.setCursor(0, 40);     
+  display.printf("TVOC: %d \n",sgp30.TVOC);
+  display.display();
+
+  delay(3000); // Wait for 3 seconds before next reading
+
+}
+

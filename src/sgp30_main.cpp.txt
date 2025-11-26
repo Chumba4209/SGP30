@@ -1,0 +1,29 @@
+#include <Arduino.h>
+#include <Adafruit_SGP30.h>
+#include "Wire.h" // for connecting I2C devices
+
+Adafruit_SGP30 sgp30; // create SGP30 sensor object
+
+void setup() {
+ Serial.begin(115200); // start serial monitor
+ sgp30.begin(); // initialize sgp30 sensor
+
+  Serial.print("Found SGP30 serial #");
+  Serial.print(sgp30.serialnumber[0], HEX);
+  Serial.print(sgp30.serialnumber[1], HEX);
+  Serial.println(sgp30.serialnumber[2], HEX);
+
+}
+
+void loop() {
+  //Read air quality values (eCO2 and TVOC)
+  if (sgp30.IAQmeasure())
+  {
+    Serial.printf("CO2: %d TVOC: %d\n", sgp30.eCO2, sgp30.TVOC);
+    // Serial.println(sgp30.eCO2);
+    // Serial.println(sgp30.TVOC);
+  }
+  delay(3000); // Wait for 3 seconds before next reading
+
+}
+
